@@ -1,17 +1,16 @@
 module Coopy
-  class IndexItem
-
-    attr_accessor :lst # Array<Int>
-
-    def initialize
-      @lst = []
+  class IndexItem 
+    def initialize()
     end
-
+    
+    attr_accessor :lst
+    
+    
     def add(i)
-      @lst ||= []
-      @lst << i
-      @lst.length
+      @lst = Array.new() if(@lst == nil)
+      @lst.push(i)
+      return @lst.length
     end
-
+    
   end
 end

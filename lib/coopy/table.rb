@@ -1,44 +1,15 @@
 module Coopy
-  module Table
-
-    attr_reader :height # integer
-    attr_reader :width # integer
-
-    def get_cell(x, y) 
-      raise NotImplementedError
-    end
-
-    def set_cell(x, y, cell) 
-      raise NotImplementedError
-    end
-
-    def get_cell_view
-      raise NotImplementedError
-    end
-
-    def is_resizable? 
-      raise NotImplementedError
-    end
-
-    def resize(w, h) 
-      raise NotImplementedError
-    end
-
-    def clear 
-      raise NotImplementedError
-    end
-
-    def insert_or_delete_rows(fate, hfate) 
-      raise NotImplementedError
-    end
-
-    def insert_or_delete_columns(fate, wfate) 
-      raise NotImplementedError
-    end
-
-    def trim_blank 
-      raise NotImplementedError
-    end
+  class Table 
     
+    
+    def getCell(x,y) puts "Abstract Table.getCell called" end
+    def setCell(x,y,c) puts "Abstract Table.setCell called" end
+    def getCellView() puts "Abstract Table.getCellView called" end
+    def isResizable() puts "Abstract Table.isResizable called" end
+    def resize(w,h) puts "Abstract Table.resize called" end
+    def clear() puts "Abstract Table.clear called" end
+    def insertOrDeleteRows(fate,hfate) puts "Abstract Table.insertOrDeleteRows called" end
+    def insertOrDeleteColumns(fate,wfate) puts "Abstract Table.insertOrDeleteColumns called" end
+    def trimBlank() puts "Abstract Table.trimBlank called" end
   end
 end

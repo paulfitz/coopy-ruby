@@ -1,73 +1,105 @@
 module Coopy
-  class Index
-
-    attr_accessor :items # Hash<String,IndexItem>
-    attr_accessor :keys # Array<String>
-    attr_accessor :top_freq # integer
-    attr_accessor :height # integer
-
-    def initialize
+  class Index 
+    def initialize()
       @items = {}
-      @cols = [] # Array<integer>
-      @keys = []
+      @cols = Array.new()
+      @keys = Array.new()
       @top_freq = 0
       @height = 0
-      @v = nil # View
-      @indexed_table = nil # Table
     end
- 
+    
+    attr_accessor :items
+    
+    
+    attr_accessor :keys
+    
+    
+    attr_accessor :top_freq
+    
+    
+    attr_accessor :height
+    
+    
+    attr_accessor :cols
+    protected :cols
+    
+    attr_accessor :v
+    protected :v
+    
+    attr_accessor :indexed_table
+    protected :indexed_table
+    
     def add_column(i)
-      @cols << i
+      @cols.push(i)
     end
-
+    
     def index_table(t)
       @indexed_table = t
-      (0...t.height).each do |i|
-        key = ""
-        if @keys.length > i
-          key = @keys[i]
-        else
-          key = to_key(t,i)
-          @keys << key
+      begin
+        _g1 = 0
+        _g = t.get_height()
+        while(_g1 < _g) 
+          i = _g1
+          _g1+=1
+          key = nil
+          if(@keys.length > i) 
+            key = @keys[i]
+          
+          else 
+            key = self.to_key(t,i)
+            @keys.push(key)
+          end
+          item = @items[key]
+          if(item == nil) 
+            item = ::Coopy::IndexItem.new()
+            @items[key] = item
+          end
+          ct = item.add(i)
+          @top_freq = ct if(ct > @top_freq)
         end
-        item = @items[key]
-        if item.nil?
-          item = IndexItem.new
-          @items[key] = item
-        end
-        ct = item.add(i)
-        @top_freq = ct if ct>@top_freq
       end
-      @height = t.height
+      @height = t.get_height()
     end
-
-    def to_key(table, i)
+    
+    def to_key(t,i)
       wide = ""
-      @v = table.get_cell_view if @v.nil?
-      @cols.each_with_index do |col, k|
-        d = table.get_cell(col,i)
-        txt = @v.to_s(d)
-        next if (txt=="" || txt=="null" || txt=="undefined")
-        wide += " // " if (k>0)
-        wide += txt
+      @v = t.get_cell_view() if(@v == nil)
+      begin
+        _g1 = 0
+        _g = @cols.length
+        while(_g1 < _g) 
+          k = _g1
+          _g1+=1
+          d = t.get_cell(@cols[k],i)
+          txt = @v.to_s(d)
+          next if(txt == "" || txt == "null" || txt == "undefined")
+          wide += " // " if(k > 0)
+          wide += txt
+        end
       end
-      wide
+      return wide
     end
-
+    
     def to_key_by_content(row)
       wide = ""
-      @cols.each_with_index do |col, k|
-        txt = row.get_row_string(col)
-        next if (txt=="" || txt=="null" || txt=="undefined")
-        wide += " // " if (k>0)
-        wide += txt
+      begin
+        _g1 = 0
+        _g = @cols.length
+        while(_g1 < _g) 
+          k = _g1
+          _g1+=1
+          txt = row.get_row_string(@cols[k])
+          next if(txt == "" || txt == "null" || txt == "undefined")
+          wide += " // " if(k > 0)
+          wide += txt
+        end
       end
-      wide
+      return wide
     end
-
-    def get_table
-      @indexed_table
+    
+    def get_table()
+      return @indexed_table
     end
-
+    
   end
 end

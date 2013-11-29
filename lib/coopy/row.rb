@@ -1,9 +1,5 @@
 module Coopy
-  module Row
-
-    def get_row_string(c) 
-      raise NotImplementedError
-    end
-
+  class Row 
+    def getRowString(c) puts "Abstract Row.getRowString called" end
   end
 end

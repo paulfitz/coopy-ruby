@@ -1,72 +1,79 @@
 module Coopy
-  class IndexPair
-
-    def initialize
-      @ia = Index.new
-      @ib = Index.new
+  class IndexPair 
+    def initialize()
+      @ia = ::Coopy::Index.new()
+      @ib = ::Coopy::Index.new()
       @quality = 0
     end
-
+    
+    attr_accessor :ia
+    protected :ia
+    
+    attr_accessor :ib
+    protected :ib
+    
+    attr_accessor :quality
+    protected :quality
+    
     def add_column(i)
-      @ia.add_column i
-      @ib.add_column i
+      @ia.add_column(i)
+      @ib.add_column(i)
     end
-
-    def add_columns(ca, cb)
-      @ia.add_column ca
-      @ib.add_column cb
+    
+    def add_columns(ca,cb)
+      @ia.add_column(ca)
+      @ib.add_column(cb)
     end
-
-    def index_tables(a, b)
-      @ia.index_table a
-      @ib.index_table b
-      # calculate
-      #   P(present and unique within a AND present and unique with b)
-      #     for rows in a
+    
+    def index_tables(a,b)
+      @ia.index_table(a)
+      @ib.index_table(b)
       good = 0
-      @ia.items.keys.each do |key|
+      _it = ::Rb::RubyIterator.new(@ia.items.keys(),nil)
+      while( _it.has_next() ) do key = _it._next()
+      
         item_a = @ia.items[key]
         spot_a = item_a.lst.length
         item_b = @ib.items[key]
-        spot_b = 0;
-        spot_b = item_b.lst.length if item_b
-        if spot_a == 1 && spot_b == 1
-          good += 1
-        end
+        spot_b = 0
+        spot_b = item_b.lst.length if(item_b != nil)
+        good+=1 if(spot_a == 1 && spot_b == 1)
+      
       end
-      @quality = good / [1.0,a.height].max
+      @quality = good / [1.0,a.get_height()].max
     end
-
+    
     def query_by_key(ka)
-      result = CrossMatch.new
+      result = ::Coopy::CrossMatch.new()
       result.item_a = @ia.items[ka]
       result.item_b = @ib.items[ka]
       result.spot_a = result.spot_b = 0
-      if ka != ""
-        result.spot_a = result.item_a.lst.length if result.item_a
-        result.spot_b = result.item_b.lst.length if result.item_b
+      if(ka != "") 
+        result.spot_a = result.item_a.lst.length if(result.item_a != nil)
+        result.spot_b = result.item_b.lst.length if(result.item_b != nil)
       end
-      result
+      return result
     end
-
+    
     def query_by_content(row)
+      result = ::Coopy::CrossMatch.new()
       ka = @ia.to_key_by_content(row)
-      query_by_key ka
+      return self.query_by_key(ka)
     end
-
+    
     def query_local(row)
-      ka = @ia.to_key(@ia.get_table,row)
-      query_by_key ka
+      ka = @ia.to_key(@ia.get_table(),row)
+      return self.query_by_key(ka)
     end
-
-    def get_top_freq
-        [@ib.top_freq, @ia.top_freq].max
+    
+    def get_top_freq()
+      return @ib.top_freq if(@ib.top_freq > @ia.top_freq)
+      return @ia.top_freq
     end
-
-    def get_quality
-      @quality
+    
+    def get_quality()
+      return @quality
     end
-
+    
   end
 end
-

@@ -1,31 +1,33 @@
 module Coopy
-  class TableView
-    include Coopy::View
-
+  class TableView 
+    def initialize()
+    end
+    
     def to_s(d)
-      d.to_s
+      return "" + Std.string(d)
     end
     
     def get_bag(d)
-    	nil
+      return nil
     end
-
+    
     def get_table(d)
-      d
+      table = ::Coopy::Table(d)
+      return table
     end
-
-    def has_structure?(d)
-      true
+    
+    def has_structure(d)
+      return true
     end
-
-    def equals(d1, d2)
-      puts("TableView#equals called")
-      false
+    
+    def equals(d1,d2)
+      ::Haxe::Log._trace("TableView.equals called",{ file_name: "TableView.hx", line_number: 28, class_name: "coopy.TableView", method_name: "equals"})
+      return false
     end
-
+    
     def to_datum(str)
-      Coopy::SimpleCell.new(str)
+      return ::Coopy::SimpleCell.new(str)
     end
-
-  end    
+    
+  end
 end

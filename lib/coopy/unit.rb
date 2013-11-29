@@ -1,53 +1,84 @@
 module Coopy
-
-  class Unit
-
-    attr_accessor :l # integer
-    attr_accessor :r # integer
-    attr_accessor :p # integer
-
-    def initialize(l = -2, r = -2, p = -2)
-        @l = l;
-        @r = r;
-        @p = p;
+  class Unit 
+    def initialize(l = -2,r = -2,p = -2)
+      @l = l
+      @r = r
+      @p = p
     end
-
-    def lp
-      (@p==-2) ? @l : @p
+    
+    attr_accessor :l
+    
+    
+    attr_accessor :r
+    
+    
+    attr_accessor :p
+    
+    
+    def lp()
+      if(@p == -2) 
+        return @l
+      
+      else 
+        return @p
+      end
     end
-
-    def describe(i)
-      (i>=0) ? ("" + i.to_s) : "-"
+    
+    def to_s()
+      return ::Coopy::Unit.describe(@p) + "|" + ::Coopy::Unit.describe(@l) + ":" + ::Coopy::Unit.describe(@r) if(@p >= -1)
+      return ::Coopy::Unit.describe(@l) + ":" + ::Coopy::Unit.describe(@r)
     end
-
-    def to_s
-      return describe(@p) + "|" + describe(@l) + ":" + describe(@r) if (@p>=-1)
-      describe(@l) + ":" + describe(@r)
-    end
-
+    
     def from_string(txt)
       txt += "]"
       at = 0
-      txt.each_char do |ch|
-        case ch
-        when /[0-9]/
-          at *= 10;
-          at += ch.to_i
-        when '-'
-          at = -1
-        when '|'
-          @p = at
-          at = 0
-        when ':'
-          @l = at
-          at = 0
-        when ']'
-          @r = at
-          return true
+      begin
+        _g1 = 0
+        _g = txt.length
+        while(_g1 < _g) 
+          i = _g1
+          _g1+=1
+          ch = HxOverrides.cca(txt,i)
+          if(ch >= 48 && ch <= 57) 
+            at *= 10
+            at += ch - 48
+          
+          else 
+            if(ch == 45) 
+              at = -1
+            
+            else 
+              if(ch == 124) 
+                @p = at
+                at = 0
+              
+              else 
+                if(ch == 58) 
+                  @l = at
+                  at = 0
+                
+                else 
+                  if(ch == 93) 
+                    @r = at
+                    return true
+                  end
+                end
+              end
+            end
+          end
         end
       end
-      false
+      return false
     end
-
+    
+    def Unit.describe(i)
+      if(i >= 0) 
+        return "" + i.to_s
+      
+      else 
+        return "-"
+      end
+    end
+    
   end
 end

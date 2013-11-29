@@ -1,12 +1,8 @@
 module Coopy
-  class Alignment
-
-    attr_accessor :reference # Alignment
-    attr_accessor :meta # Alignment
-
-    def initialize
-      @map_a2b = {} # Map<Int,Int>
-      @map_b2a = {} # Map<Int,Int>
+  class Alignment 
+    def initialize()
+      @map_a2b = {}
+      @map_b2a = {}
       @ha = @hb = 0
       @map_count = 0
       @reference = nil
@@ -15,105 +11,143 @@ module Coopy
       @ia = 0
       @ib = 0
     end
-
-    def range(ha, hb)
+    
+    attr_accessor :map_a2b
+    protected :map_a2b
+    
+    attr_accessor :map_b2a
+    protected :map_b2a
+    
+    attr_accessor :ha
+    protected :ha
+    
+    attr_accessor :hb
+    protected :hb
+    
+    attr_accessor :ta
+    protected :ta
+    
+    attr_accessor :tb
+    protected :tb
+    
+    attr_accessor :ia
+    protected :ia
+    
+    attr_accessor :ib
+    protected :ib
+    
+    attr_accessor :map_count
+    protected :map_count
+    
+    attr_accessor :order_cache
+    protected :order_cache
+    
+    attr_accessor :order_cache_has_reference
+    protected :order_cache_has_reference
+    
+    attr_accessor :index_columns
+    protected :index_columns
+    
+    attr_accessor :reference
+    
+    
+    attr_accessor :meta
+    
+    
+    def range(ha,hb)
       @ha = ha
       @hb = hb
     end
-
-    def tables(ta, tb)
+    
+    def tables(ta,tb)
       @ta = ta
       @tb = tb
     end
-
-    def headers(ia, ib)
+    
+    def headers(ia,ib)
       @ia = ia
       @ib = ib
     end
-
+    
     def set_rowlike(flag)
     end
-
-    def hb
-      @hb
-    end
-
-    def link(a, b)
+    
+    def link(a,b)
       @map_a2b[a] = b
       @map_b2a[b] = a
       @map_count+=1
     end
-
+    
     def add_index_columns(unit)
-      if @index_columns.nil?
-        @index_columns = []
-      end
-      @index_columns << unit
+      @index_columns = Array.new() if(@index_columns == nil)
+      @index_columns.push(unit)
     end
-
-    def get_index_columns
-      @index_columns
+    
+    def get_index_columns()
+      return @index_columns
     end
-
+    
     def a2b(a)
-      @map_a2b[a]
+      return @map_a2b[a]
     end
-
+    
     def b2a(b)
-      @map_b2a[b]
+      return @map_b2a[b]
     end
-
-    def count
-      @map_count
+    
+    def count()
+      return @map_count
     end
-
-    def to_s
-      map_a2b.to_s
+    
+    def to_s()
+      return "" + "not implemented yet"
     end
-
-    def to_order
-      if @order_cache
-        if @reference
-          if !@order_cache_has_reference
-            @order_cache = nil
+    
+    def to_order()
+      if(@order_cache != nil) 
+        if(@reference != nil) 
+          @order_cache = nil if(!@order_cache_has_reference)
+        end
+      end
+      @order_cache = self.to_order3() if(@order_cache == nil)
+      @order_cache_has_reference = true if(@reference != nil)
+      return @order_cache
+    end
+    
+    def get_source()
+      return @ta
+    end
+    
+    def get_target()
+      return @tb
+    end
+    
+    def get_source_header()
+      return @ia
+    end
+    
+    def get_target_header()
+      return @ib
+    end
+    
+    def to_order3()
+      ref = @reference
+      if(ref == nil) 
+        ref = ::Coopy::Alignment.new()
+        ref.range(@ha,@ha)
+        ref.tables(@ta,@ta)
+        begin
+          _g1 = 0
+          _g = @ha
+          while(_g1 < _g) 
+            i = _g1
+            _g1+=1
+            ref.link(i,i)
           end
         end
       end
-      @order_cache = to_order_3 if @order_cache.nil?
-      @order_cache_has_reference = true if reference
-      @order_cache
-    end
-
-    def get_source
-      @ta
-    end
-
-    def get_target
-      @tb
-    end
-
-    def get_source_header
-      @ia
-    end
-
-    def get_target_header
-      @ib
-    end
-
-    def to_order_3
-      ref = @reference
-      if ref.nil?
-        ref = Coopy::Alignment.new
-        ref.range(@ha,@ha)
-        ref.tables(@ta,@ta)
-        (0...@ha).each do |i|
-          ref.link(i,i)
-        end
-      end
-      order = Coopy::Ordering.new
-      if @reference.nil?
-        order.ignore_parent
-      end
+      order = ::Coopy::Ordering.new()
+      order.ignore_parent() if(@reference == nil)
       xp = 0
       xl = 0
       xr = 0
@@ -123,32 +157,51 @@ module Coopy
       vp = {}
       vl = {}
       vr = {}
-      (0...hp).each { |i| vp[i] = i }
-      (0...hl).each { |i| vl[i] = i }
-      (0...hr).each { |i| vr[i] = i }
+      begin
+        _g = 0
+        while(_g < hp) 
+          i = _g
+          _g+=1
+          vp[i] = i
+        end
+      end
+      begin
+        _g = 0
+        while(_g < hl) 
+          i = _g
+          _g+=1
+          vl[i] = i
+        end
+      end
+      begin
+        _g = 0
+        while(_g < hr) 
+          i = _g
+          _g+=1
+          vr[i] = i
+        end
+      end
       ct_vp = hp
       ct_vl = hl
       ct_vr = hr
-      prev  = -1
-      ct    = 0
-      max_ct = (hp+hl+hr)*10
-      while (ct_vp>0 || 
-             ct_vl>0 || 
-             ct_vr>0) do
+      prev = -1
+      ct = 0
+      max_ct = (hp + hl + hr) * 10
+      while(ct_vp > 0 || ct_vl > 0 || ct_vr > 0) 
         ct+=1
-        if ct>max_ct
-          puts("Ordering took too long, something went wrong")
+        if(ct > max_ct) 
+          ::Haxe::Log._trace("Ordering took too long, something went wrong",{ file_name: "Alignment.hx", line_number: 151, class_name: "coopy.Alignment", method_name: "toOrder3"})
           break
         end
-        xp = 0 if (xp>=hp)
-        xl = 0 if (xl>=hl)
-        xr = 0 if (xr>=hr)
-        if xp<hp && ct_vp>0
-          if a2b(xp).nil? && ref.a2b(xp).nil?
-            if vp.has_key?(xp)
+        xp = 0 if(xp >= hp)
+        xl = 0 if(xl >= hl)
+        xr = 0 if(xr >= hr)
+        if(xp < hp && ct_vp > 0) 
+          if(self.a2b(xp) == nil && ref.a2b(xp) == nil) 
+            if(vp.include?(xp)) 
               order.add(-1,-1,xp)
               prev = xp
-              vp.remove(xp)
+              vp.delete(xp)
               ct_vp-=1
             end
             xp+=1
@@ -157,93 +210,95 @@ module Coopy
         end
         zl = nil
         zr = nil
-        if xl<hl && ct_vl>0
+        if(xl < hl && ct_vl > 0) 
           zl = ref.b2a(xl)
-          if zl.nil?
-            if vl.has_key?(xl)
+          if(zl == nil) 
+            if(vl.include?(xl)) 
               order.add(xl,-1,-1)
-              vl.remove(xl)
+              vl.delete(xl)
               ct_vl-=1
             end
             xl+=1
             next
           end
         end
-        if xr<hr && ct_vr>0
-          zr = b2a(xr)
-          if zr.nil?
-            if vr.has_key?(xr)
+        if(xr < hr && ct_vr > 0) 
+          zr = self.b2a(xr)
+          if(zr == nil) 
+            if(vr.include?(xr)) 
               order.add(-1,xr,-1)
               vr.delete(xr)
-               ct_vr-=1
+              ct_vr-=1
             end
             xr+=1
             next
           end
         end
-        if zl
-          if a2b(zl).nil?
-            # row deleted in remote
-            if vl.has_key?(xl)
+        if(zl != nil) 
+          if(self.a2b(zl) == nil) 
+            if(vl.include?(xl)) 
               order.add(xl,-1,zl)
               prev = zl
               vp.delete(zl)
               ct_vp-=1
               vl.delete(xl)
               ct_vl-=1
-              xp = zl+1
+              xp = zl + 1
             end
             xl+=1
             next
           end
         end
-        if zr
-          if ref.a2b(zr).nil?
-            # row deleted in local
-            if vr.has_key?(xr)
+        if(zr != nil) 
+          if(ref.a2b(zr) == nil) 
+            if(vr.include?(xr)) 
               order.add(-1,xr,zr)
               prev = zr
-              vp.remove(zr)
+              vp.delete(zr)
               ct_vp-=1
-              vr.remove(xr)
+              vr.delete(xr)
               ct_vr-=1
-              xp = zr+1
+              xp = zr + 1
             end
             xr+=1
             next
           end
         end
-        if zl && zr && a2b(zl) && ref.a2b(zr)
-          # we have a choice of order
-          # local thinks zl should come next
-          # remote thinks zr should come next
-          if zl==prev+1 || zr!=prev+1
-            if vr.has_key?(xr)
+        if(zl != nil && zr != nil && self.a2b(zl) != nil && ref.a2b(zr) != nil) 
+          if(zl == prev + 1 || zr != prev + 1) 
+            if(vr.include?(xr)) 
               order.add(ref.a2b(zr),xr,zr)
               prev = zr
               vp.delete(zr)
               ct_vp-=1
-              vl.delete(ref.a2b(zr))
+              begin
+                key = ref.a2b(zr)
+                vl.delete(key)
+              end
               ct_vl-=1
               vr.delete(xr)
               ct_vr-=1
-              xp = zr+1
-              xl = ref.a2b(zr)+1
+              xp = zr + 1
+              xl = ref.a2b(zr) + 1
             end
             xr+=1
             next
-          else
-            if vl.has_key?(xl)
-              order.add(xl,a2b(zl),zl)
+          
+          else 
+            if(vl.include?(xl)) 
+              order.add(xl,self.a2b(zl),zl)
               prev = zl
-              vp.remove(zl)
+              vp.delete(zl)
               ct_vp-=1
-              vl.remove(xl)
+              vl.delete(xl)
               ct_vl-=1
-              vr.remove(a2b(zl))
+              begin
+                key = self.a2b(zl)
+                vr.delete(key)
+              end
               ct_vr-=1
-              xp = zl+1
-              xr = a2b(zl)+1
+              xp = zl + 1
+              xr = self.a2b(zl) + 1
             end
             xl+=1
             next
@@ -255,6 +310,6 @@ module Coopy
       end
       return order
     end
-
+    
   end
 end

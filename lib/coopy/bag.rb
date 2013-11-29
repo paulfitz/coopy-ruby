@@ -1,17 +1,7 @@
 module Coopy
-
-  module Bag
-
-    attr_reader :size # integer
+  class Bag 
     
-    def get_item(x)
-      raise NotImplementedError
-    end
-
-    def get_item_view
-      raise NotImplementedError
-    end
-
+    def getItem(x) puts "Abstract Bag.getItem called" end
+    def getItemView() puts "Abstract Bag.getItemView called" end
   end
 end
-

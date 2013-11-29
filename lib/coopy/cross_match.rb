@@ -1,10 +1,19 @@
 module Coopy
-  class CrossMatch
-
-    attr_accessor :spot_a # integer
-    attr_accessor :spot_b # integer
-    attr_accessor :item_a # IndexItem
-    attr_accessor :item_b # IndexItem
-
+  class CrossMatch 
+    def initialize()
+    end
+    
+    attr_accessor :spot_a
+    
+    
+    attr_accessor :spot_b
+    
+    
+    attr_accessor :item_a
+    
+    
+    attr_accessor :item_b
+    
+    
   end
 end

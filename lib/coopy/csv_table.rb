@@ -3,7 +3,6 @@ require 'csv'
 module Coopy
   class CsvTable
 
-    include Coopy::Table
 
     def initialize(csv)
       @csv = csv
