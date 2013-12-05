@@ -18,12 +18,11 @@ begin
         return ValueType.tfunction
       when "NilClass"
         return ValueType.tnull
+      when "Hash"
+        return ValueType.tobject
       else
-        begin
-          c = __define_feature__("rb.Boot.getClass",v.__class__)
-          return ValueType.tclass(c) if c != nil
-          return ValueType.tunknown
-        end
+        return ValueType.tclass(v.class) if v.respond_to?("class")
+        return ValueType.tunknown
       end
     end
     

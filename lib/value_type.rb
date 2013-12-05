@@ -1,16 +1,20 @@
 begin 
-  public final class ValueType extends enum {
-    public static const __isenum : Boolean = true
-    public function ValueType( t : String, index : int, p : Array = nil ) : void { this.tag = t; this.index = index; this.params = p; }
-    public static var TBool : ValueType = new ValueType("TBool",3)
-    public static function TClass(c : Class) : ValueType { return new ValueType("TClass",6,[c]); }
-    public static function TEnum(e : Class) : ValueType { return new ValueType("TEnum",7,[e]); }
-    public static var TFloat : ValueType = new ValueType("TFloat",2)
-    public static var TFunction : ValueType = new ValueType("TFunction",5)
-    public static var TInt : ValueType = new ValueType("TInt",1)
-    public static var TNull : ValueType = new ValueType("TNull",0)
-    public static var TObject : ValueType = new ValueType("TObject",4)
-    public static var TUnknown : ValueType = new ValueType("TUnknown",8)
-    public static var __constructs__ : Array = ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"];
-  }
-}
+  class ValueType
+    ISENUM__ = true
+    attr_accessor :tag
+    attr_accessor :index
+    attr_accessor :params
+    def initialize(t,index,p = nil ) @tag = t; @index = index; @params = p; end
+    
+    def ValueType.tbool() ValueType.new("TBool",3) end
+    def ValueType.tclass(c)  ValueType.new("TClass",6,[c]) end
+    def ValueType.tenum(e)  ValueType.new("TEnum",7,[e]) end
+    def ValueType.tfloat() ValueType.new("TFloat",2) end
+    def ValueType.tfunction() ValueType.new("TFunction",5) end
+    def ValueType.tint() ValueType.new("TInt",1) end
+    def ValueType.tnull() ValueType.new("TNull",0) end
+    def ValueType.tobject() ValueType.new("TObject",4) end
+    def ValueType.tunknown() ValueType.new("TUnknown",8) end
+    CONSTRUCTS__ = ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"]
+  end
+end

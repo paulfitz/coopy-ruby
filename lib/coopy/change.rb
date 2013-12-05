@@ -19,7 +19,7 @@ module Coopy
     def to_s 
       begin
         _g = @mode
-        case(_g[1])
+        case(_g.index)
         when 0
           return "no change"
         when 2

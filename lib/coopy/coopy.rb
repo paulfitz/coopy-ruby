@@ -161,34 +161,10 @@ module Coopy
         while(_g < _g1.length) 
           name = _g1[_g]
           _g+=1
-          t = nil
-          begin
-            v = nil
-            begin
-              v = json[name.to_sym]
-            rescue => e
-            end
-            t = v
-          end
-          columns = nil
-          begin
-            v = nil
-            begin
-              v = t["columns".to_sym]
-            rescue => e
-            end
-            columns = v
-          end
+          t = json[name]
+          columns = t["columns"]
           next if columns == nil
-          rows = nil
-          begin
-            v = nil
-            begin
-              v = t["rows".to_sym]
-            rescue => e
-            end
-            rows = v
-          end
+          rows = t["rows"]
           next if rows == nil
           output = ::Coopy::SimpleTable.new(columns.length,rows.length)
           has_hash = false
@@ -222,15 +198,7 @@ module Coopy
                 while(_g5 < _g4) 
                   j = _g5
                   _g5+=1
-                  val = nil
-                  begin
-                    v = nil
-                    begin
-                      v = row[columns[j].to_sym]
-                    rescue => e
-                    end
-                    val = v
-                  end
+                  val = row[columns[j]]
                   output.set_cell(j,i,::Coopy::Coopy.cell_for(val))
                 end
               end

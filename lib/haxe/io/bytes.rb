@@ -15,7 +15,7 @@ module Haxe::Io
     public
     
     def read_string(pos,len)
-      throw ::Haxe::Io::_Error.outside_bounds if pos < 0 || len < 0 || pos + len > @length
+      throw ::Haxe::Io::Error.outside_bounds if pos < 0 || len < 0 || pos + len > @length
       return @b.byteslice(pos,len)
     end
     

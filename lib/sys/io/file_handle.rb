@@ -1,7 +1,11 @@
 module Sys::Io
-  public final class FileHandle extends enum {
-    public static const __isenum : Boolean = true
-    public function FileHandle( t : String, index : int, p : Array = nil ) : void { this.tag = t; this.index = index; this.params = p; }
-    public static var __constructs__ : Array = [];
-  }
-}
+  class FileHandle
+    ISENUM__ = true
+    attr_accessor :tag
+    attr_accessor :index
+    attr_accessor :params
+    def initialize(t,index,p = nil ) @tag = t; @index = index; @params = p; end
+    
+    CONSTRUCTS__ = []
+  end
+end

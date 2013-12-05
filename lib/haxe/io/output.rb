@@ -8,7 +8,7 @@ module Haxe::Io
     def write_bytes(s,pos,len)
       k = len
       b = s.b
-      throw ::Haxe::Io::_Error.outside_bounds if pos < 0 || len < 0 || pos + len > s.length
+      throw ::Haxe::Io::Error.outside_bounds if pos < 0 || len < 0 || pos + len > s.length
       while(k > 0) 
         self.write_byte(b[pos])
         pos+=1

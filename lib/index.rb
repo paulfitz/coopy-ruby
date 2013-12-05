@@ -10,11 +10,13 @@ begin
   require 'reflect'
   require 'string_buf'
   require 'sys'
+  require 'value_type'
   require 'type'
   require 'coopy/alignment'
   require 'coopy/bag'
   require 'coopy/cell_info'
   require 'coopy/change'
+  require 'coopy/change_type'
   require 'coopy/compare'
   require 'coopy/compare_flags'
   require 'coopy/compare_table'
@@ -51,9 +53,11 @@ begin
   require 'haxe/log'
   require 'haxe/io/bytes'
   require 'haxe/io/eof'
+  require 'haxe/io/error'
   require 'haxe/io/output'
   require 'rb/ruby_iterator'
+  require 'sys/io/file_handle'
   require 'sys/io/file'
   require 'sys/io/file_output'
-  # ::Coopy::Coopy.main
+  ::Coopy::Coopy.main
 end

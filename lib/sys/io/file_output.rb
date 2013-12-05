@@ -21,7 +21,7 @@ module Sys::Io
     def write_bytes(b,p,l)
       s = b.read_string(p,l)
       r = @__f.write(s)
-      throw ::Haxe::Io::_Error.custom("An error occurred") if r < l
+      throw ::Haxe::Io::Error.custom("An error occurred") if r < l
       return r
     end
     

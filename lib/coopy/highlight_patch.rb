@@ -198,13 +198,13 @@ module Coopy
           if mod != nil 
             if mod[0].ord == 58 
               move = true
-              mod = mod[1..mod.length]
+              mod = mod[1,mod.length]
             end
           end
           @header[i] = name
           if mod != nil 
             if mod[0].ord == 40 
-              prev_name = mod[1..mod.length - 2]
+              prev_name = mod[1,mod.length - 2]
               @headerPre[prev_name] = i
               @headerPost[name] = i
               @headerRename[prev_name] = name

@@ -26,15 +26,7 @@ module Haxe
         while(_g < fields.length) 
           f = fields[_g]
           _g+=1
-          value = nil
-          begin
-            v1 = nil
-            begin
-              v1 = v[f.to_sym]
-            rescue => e
-            end
-            value = v1
-          end
+          value = v[f]
           next if Reflect.is_function(value)
           if first 
             first = false
@@ -57,78 +49,68 @@ module Haxe
       v = (@replacer).call(k,v) if @replacer != nil
       begin
         _g = Type._typeof(v)
-        case(_g[1])
+        case(_g.index)
         when 8
           @buf.b += "\"???\"".to_s
         when 4
           self.obj_string(v)
         when 1
-          begin
-            v1 = v
-            @buf.b += v1.to_s
-          end
+          v1 = v
+          @buf.b += v1.to_s
         when 2
-          begin
-            v1 = nil
-            if lambda{|_this_| f = v
-            _r = f.finite?}.call(self) 
-              v1 = v
-            else 
-              v1 = "null"
-            end
-            @buf.b += v1.to_s
+          v1 = nil
+          if lambda{|_this_| f = v
+          _r = f.finite?}.call(self) 
+            v1 = v
+          else 
+            v1 = "null"
           end
+          @buf.b += v1.to_s
         when 5
           @buf.b += "\"<fun>\"".to_s
         when 6
-          begin
-            c = _g.params[0]
-            if c == String 
-              self.quote(v)
-            elsif c == Array 
-              v1 = v
-              @buf.b += [91].pack("U")
-              len = v1.length
-              if len > 0 
-                self.to_string_rec(0,v1[0])
-                i = 1
-                while(i < len) 
-                  @buf.b += [44].pack("U")
-                  self.to_string_rec(i,v1[i+=1])
-                end
+          c = _g.params[0]
+          if c == String 
+            self.quote(v)
+          elsif c == Array 
+            v1 = v
+            @buf.b += [91].pack("U")
+            len = v1.length
+            if len > 0 
+              self.to_string_rec(0,v1[0])
+              i = 1
+              while(i < len) 
+                @buf.b += [44].pack("U")
+                self.to_string_rec(i,v1[i+=1])
               end
-              @buf.b += [93].pack("U")
-            elsif c == ::Haxe::Ds::StringMap 
-              v1 = v
-              o = { }
-              _it2 = ::Rb::RubyIterator.new(v1.keys)
-              while(_it2.has_next) do
-                k1 = _it2._next
-                value = v1[k1]
-                o[k1] = value
-              end
-              self.obj_string(o)
-            else 
-              self.obj_string(v)
             end
+            @buf.b += [93].pack("U")
+          elsif c == ::Haxe::Ds::StringMap 
+            v1 = v
+            o = { }
+            _it2 = ::Rb::RubyIterator.new(v1.keys)
+            while(_it2.has_next) do
+              k1 = _it2._next
+              value = v1[k1]
+              o[k1] = value
+            end
+            self.obj_string(o)
+          else 
+            self.obj_string(v)
           end
         when 7
+          i = nil
           begin
-            i = nil
-            begin
-              e = v
-              i = e[1]
-            end
-            begin
-              v1 = i
-              @buf.b += v1.to_s
-            end
+            e = v
+            i = e.index
           end
-        when 3
           begin
-            v1 = v
+            v1 = i
             @buf.b += v1.to_s
           end
+        when 3
+          v1 = v
+          @buf.b += v1.to_s
         when 0
           @buf.b += "null".to_s
         end
@@ -143,7 +125,7 @@ module Haxe
         begin
           index = i
           i+=1
-          c = s[index].ord
+          c = (s[index] || 0).ord
         end
         break if c == 0
         case(c)
@@ -176,7 +158,7 @@ module Haxe
     
     def invalid_char 
       @pos-=1
-      throw "Invalid char " + @str[@pos].ord.to_s + " at position " + @pos.to_s
+      throw "Invalid char " + (@str[@pos] || 0).ord.to_s + " at position " + @pos.to_s
     end
     
     def parse_rec 
@@ -185,1697 +167,176 @@ module Haxe
         begin
           index = @pos
           @pos+=1
-          c = @str[index].ord
+          c = (@str[index] || 0).ord
         end
         case(c)
-        when 32
-          when 13
-          when 10
-          when 9
-          when 123
-          begin
-            obj = { }
-            field = nil
-            comma = nil
-            while(true) 
-              c1 = nil
+        when 32,13,10,9
+        when 123
+          obj = { }
+          field = nil
+          comma = nil
+          while(true) 
+            c1 = nil
+            begin
+              index = @pos
+              @pos+=1
+              c1 = (@str[index] || 0).ord
+            end
+            case(c1)
+            when 32,13,10,9
+            when 125
+              self.invalid_char if field != nil || comma == false
+              return obj
+            when 58
+              self.invalid_char if field == nil
               begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
+                value = self.parse_rec
+                obj[field] = value
               end
-              case(c1)
-              when 32
-                when 13
-                when 10
-                when 9
-                when 125
-                begin
-                  self.invalid_char if field != nil || comma == false
-                  return obj
-                end
-              when 58
-                begin
-                  self.invalid_char if field == nil
-                  begin
-                    value = self.parse_rec
-                    obj[field] = value
-                  end
-                  field = nil
-                  comma = true
-                end
-              when 44
-                if comma 
-                  comma = false
-                else 
-                  self.invalid_char
-                end
-              when 34
-                begin
-                  self.invalid_char if comma
-                  field = self.parse_string
-                end
-              else
+              field = nil
+              comma = true
+            when 44
+              if comma 
+                comma = false
+              else 
                 self.invalid_char
               end
+            when 34
+              self.invalid_char if comma
+              field = self.parse_string
+            else
+              self.invalid_char
             end
           end
         when 91
-          begin
-            arr = []
-            comma = nil
-            while(true) 
-              c1 = nil
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
+          arr = []
+          comma = nil
+          while(true) 
+            c1 = nil
+            begin
+              index = @pos
+              @pos+=1
+              c1 = (@str[index] || 0).ord
+            end
+            case(c1)
+            when 32,13,10,9
+            when 93
+              self.invalid_char if comma == false
+              return arr
+            when 44
+              if comma 
+                comma = false
+              else 
+                self.invalid_char
               end
-              case(c1)
-              when 32
-                when 13
-                when 10
-                when 9
-                when 93
-                begin
-                  self.invalid_char if comma == false
-                  return arr
-                end
-              when 44
-                if comma 
-                  comma = false
-                else 
-                  self.invalid_char
-                end
-              else
-                begin
-                  self.invalid_char if comma
-                  @pos-=1
-                  arr.push(self.parse_rec)
-                  comma = true
-                end
-              end
+            else
+              self.invalid_char if comma
+              @pos-=1
+              arr.push(self.parse_rec)
+              comma = true
             end
           end
         when 116
-          begin
-            save = @pos
-            if lambda{|_this_| index = @pos
-            @pos+=1
-            _r = @str[index].ord}.call(self) != 114 || lambda{|_this_| index = @pos
-            @pos+=1
-            _r2 = @str[index].ord}.call(self) != 117 || lambda{|_this_| index = @pos
-            @pos+=1
-            _r3 = @str[index].ord}.call(self) != 101 
-              @pos = save
-              self.invalid_char
-            end
-            return true
+          save = @pos
+          if lambda{|_this_| index = @pos
+          @pos+=1
+          _r = (@str[index] || 0).ord}.call(self) != 114 || lambda{|_this_| index = @pos
+          @pos+=1
+          _r2 = (@str[index] || 0).ord}.call(self) != 117 || lambda{|_this_| index = @pos
+          @pos+=1
+          _r3 = (@str[index] || 0).ord}.call(self) != 101 
+            @pos = save
+            self.invalid_char
           end
+          return true
         when 102
-          begin
-            save = @pos
-            if lambda{|_this_| index = @pos
-            @pos+=1
-            _r4 = @str[index].ord}.call(self) != 97 || lambda{|_this_| index = @pos
-            @pos+=1
-            _r5 = @str[index].ord}.call(self) != 108 || lambda{|_this_| index = @pos
-            @pos+=1
-            _r6 = @str[index].ord}.call(self) != 115 || lambda{|_this_| index = @pos
-            @pos+=1
-            _r7 = @str[index].ord}.call(self) != 101 
-              @pos = save
-              self.invalid_char
-            end
-            return false
+          save = @pos
+          if lambda{|_this_| index = @pos
+          @pos+=1
+          _r4 = (@str[index] || 0).ord}.call(self) != 97 || lambda{|_this_| index = @pos
+          @pos+=1
+          _r5 = (@str[index] || 0).ord}.call(self) != 108 || lambda{|_this_| index = @pos
+          @pos+=1
+          _r6 = (@str[index] || 0).ord}.call(self) != 115 || lambda{|_this_| index = @pos
+          @pos+=1
+          _r7 = (@str[index] || 0).ord}.call(self) != 101 
+            @pos = save
+            self.invalid_char
           end
+          return false
         when 110
-          begin
-            save = @pos
-            if lambda{|_this_| index = @pos
-            @pos+=1
-            _r8 = @str[index].ord}.call(self) != 117 || lambda{|_this_| index = @pos
-            @pos+=1
-            _r9 = @str[index].ord}.call(self) != 108 || lambda{|_this_| index = @pos
-            @pos+=1
-            _r10 = @str[index].ord}.call(self) != 108 
-              @pos = save
-              self.invalid_char
-            end
-            return nil
+          save = @pos
+          if lambda{|_this_| index = @pos
+          @pos+=1
+          _r8 = (@str[index] || 0).ord}.call(self) != 117 || lambda{|_this_| index = @pos
+          @pos+=1
+          _r9 = (@str[index] || 0).ord}.call(self) != 108 || lambda{|_this_| index = @pos
+          @pos+=1
+          _r10 = (@str[index] || 0).ord}.call(self) != 108 
+            @pos = save
+            self.invalid_char
           end
+          return nil
         when 34
           return self.parse_string
-        when 48
-          begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
+        when 48,49,50,51,52,53,54,55,56,57,45
+          c1 = c
+          start = @pos - 1
+          minus = c1 == 45
+          digit = !minus
+          zero = c1 == 48
+          point = false
+          e = false
+          pm = false
+          _end = false
+          while(true) 
             begin
-              x = @str[start..@pos - start]
-              f = x.to_f
+              index = @pos
+              @pos+=1
+              c1 = (@str[index] || 0).ord
             end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
+            case(c1)
+            when 48
+              self.invalid_number(start) if zero && !point
+              if minus 
+                minus = false
+                zero = true
+              end
+              digit = true
+            when 49,50,51,52,53,54,55,56,57
+              self.invalid_number(start) if zero && !point
+              minus = false if minus
+              digit = true
+              zero = false
+            when 46
+              self.invalid_number(start) if minus || point
+              digit = false
+              point = true
+            when 101,69
+              self.invalid_number(start) if minus || zero || e
+              digit = false
+              e = true
+            when 43,45
+              self.invalid_number(start) if !e || pm
+              digit = false
+              pm = true
+            else
+              self.invalid_number(start) if !digit
+              @pos-=1
+              _end = true
             end
+            break if _end
           end
-        when 49
+          f = nil
           begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
-            begin
-              x = @str[start..@pos - start]
-              f = x.to_f
-            end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
-            end
+            x = @str[start,@pos - start]
+            f = x.to_f
           end
-        when 50
-          begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
-            begin
-              x = @str[start..@pos - start]
-              f = x.to_f
-            end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
-            end
-          end
-        when 51
-          begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
-            begin
-              x = @str[start..@pos - start]
-              f = x.to_f
-            end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
-            end
-          end
-        when 52
-          begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
-            begin
-              x = @str[start..@pos - start]
-              f = x.to_f
-            end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
-            end
-          end
-        when 53
-          begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
-            begin
-              x = @str[start..@pos - start]
-              f = x.to_f
-            end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
-            end
-          end
-        when 54
-          begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
-            begin
-              x = @str[start..@pos - start]
-              f = x.to_f
-            end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
-            end
-          end
-        when 55
-          begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
-            begin
-              x = @str[start..@pos - start]
-              f = x.to_f
-            end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
-            end
-          end
-        when 56
-          begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
-            begin
-              x = @str[start..@pos - start]
-              f = x.to_f
-            end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
-            end
-          end
-        when 57
-          begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
-            begin
-              x = @str[start..@pos - start]
-              f = x.to_f
-            end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
-            end
-          end
-        when 45
-          begin
-            c1 = c
-            start = @pos - 1
-            minus = c1 == 45
-            digit = !minus
-            zero = c1 == 48
-            point = false
-            e = false
-            pm = false
-            _end = false
-            while(true) 
-              begin
-                index = @pos
-                @pos+=1
-                c1 = @str[index].ord
-              end
-              case(c1)
-              when 48
-                begin
-                  self.invalid_number(start) if zero && !point
-                  if minus 
-                    minus = false
-                    zero = true
-                  end
-                  digit = true
-                end
-              when 49
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 50
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 51
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 52
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 53
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 54
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 55
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 56
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 57
-                begin
-                  self.invalid_number(start) if zero && !point
-                  minus = false if minus
-                  digit = true
-                  zero = false
-                end
-              when 46
-                begin
-                  self.invalid_number(start) if minus || point
-                  digit = false
-                  point = true
-                end
-              when 101
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 69
-                begin
-                  self.invalid_number(start) if minus || zero || e
-                  digit = false
-                  e = true
-                end
-              when 43
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              when 45
-                begin
-                  self.invalid_number(start) if !e || pm
-                  digit = false
-                  pm = true
-                end
-              else
-                begin
-                  self.invalid_number(start) if !digit
-                  @pos-=1
-                  _end = true
-                end
-              end
-              break if _end
-            end
-            f = nil
-            begin
-              x = @str[start..@pos - start]
-              f = x.to_f
-            end
-            i = int(f) | 0
-            if i == f 
-              return i
-            else 
-              return f
-            end
+          i = int(f) | 0
+          if i == f 
+            return i
+          else 
+            return f
           end
         else
           self.invalid_char
@@ -1891,19 +352,15 @@ module Haxe
         begin
           index = @pos
           @pos+=1
-          c = @str[index].ord
+          c = (@str[index] || 0).ord
         end
         break if c == 34
         if c == 92 
-          begin
-            s = @str
-            len = @pos - start - 1
-            buf.b += ((len == nil) ? s[start..-1] : s[start..len])
-          end
+          buf.b += @str[start,@pos - start - 1]
           begin
             index = @pos
             @pos+=1
-            c = @str[index].ord
+            c = (@str[index] || 0).ord
           end
           case(c)
           when 114
@@ -1916,22 +373,16 @@ module Haxe
             buf.b += [8].pack("U")
           when 102
             buf.b += [12].pack("U")
-          when 47
-            buf.b += [c].pack("U")
-          when 92
-            buf.b += [c].pack("U")
-          when 34
+          when 47,92,34
             buf.b += [c].pack("U")
           when 117
+            uc = nil
             begin
-              uc = nil
-              begin
-                x = "0x" + @str[@pos..4]
-                uc = x.to_i
-              end
-              @pos += 4
-              buf.b += [uc].pack("U")
+              x = "0x" + @str[@pos,4]
+              uc = x.to_i
             end
+            @pos += 4
+            buf.b += [uc].pack("U")
           else
             throw "Invalid escape sequence \\" + [c].pack("U") + " at position " + (@pos - 1).to_s
           end
@@ -1940,16 +391,12 @@ module Haxe
           throw "Unclosed string"
         end
       end
-      begin
-        s = @str
-        len = @pos - start - 1
-        buf.b += ((len == nil) ? s[start..-1] : s[start..len])
-      end
+      buf.b += @str[start,@pos - start - 1]
       return buf.b
     end
     
     def invalid_number(start)
-      throw "Invalid number at position " + start.to_s + ": " + @str[start..@pos - start]
+      throw "Invalid number at position " + start.to_s + ": " + @str[start,@pos - start]
     end
     
     public
