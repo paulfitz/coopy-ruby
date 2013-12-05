@@ -1,10 +1,16 @@
 begin 
   # Hello good evening and welcome to a translation from the original Haxe
-  require 'hx_overrides'
+  # some band-aids until we figure out a better translation for iterators
+  def _hx_iterator(o) return lambda{ (o.class == Array) ? ::Rb::RubyIterator.new(o) : ((o.respond_to? 'iterator') ? o.iterator : o)} end
+  def _hx_call(o,k) ((o.respond_to? k) ? o.method(k).call : o[k].call) end
+  
   require 'lambda'
   require 'list'
   require 'imap'
-  require 'std'
+  require 'reflect'
+  require 'string_buf'
+  require 'sys'
+  require 'type'
   require 'coopy/alignment'
   require 'coopy/bag'
   require 'coopy/cell_info'
@@ -41,9 +47,13 @@ begin
   require 'coopy/viewed_datum'
   require 'coopy/viterbi'
   require 'coopy/workspace'
+  require 'haxe/json'
   require 'haxe/log'
-  require 'haxe/ds/int_map'
-  require 'haxe/ds/string_map'
+  require 'haxe/io/bytes'
+  require 'haxe/io/eof'
+  require 'haxe/io/output'
   require 'rb/ruby_iterator'
-  ::Coopy::Coopy.main()
+  require 'sys/io/file'
+  require 'sys/io/file_output'
+  # ::Coopy::Coopy.main
 end

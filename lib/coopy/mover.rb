@@ -1,11 +1,12 @@
 module Coopy
   class Mover 
-    def initialize()
+    
+    def initialize
     end
     
     def Mover.move_units(units)
-      isrc = Array.new()
-      idest = Array.new()
+      isrc = Array.new
+      idest = Array.new
       len = units.length
       ltop = -1
       rtop = -1
@@ -17,9 +18,9 @@ module Coopy
           i = _g
           _g+=1
           unit = units[i]
-          if(unit.l >= 0 && unit.r >= 0) 
-            ltop = unit.l if(ltop < unit.l)
-            rtop = unit.r if(rtop < unit.r)
+          if unit.l >= 0 && unit.r >= 0 
+            ltop = unit.l if ltop < unit.l
+            rtop = unit.r if rtop < unit.r
             begin
               in_src[unit.l] = i
               i
@@ -39,7 +40,7 @@ module Coopy
           i = _g1
           _g1+=1
           v = in_src[i]
-          isrc.push(v) if(v != nil)
+          isrc.push(v) if v != nil
         end
       end
       begin
@@ -49,7 +50,7 @@ module Coopy
           i = _g1
           _g1+=1
           v = in_dest[i]
-          idest.push(v) if(v != nil)
+          idest.push(v) if v != nil
         end
       end
       return ::Coopy::Mover.move_without_extras(isrc,idest)
@@ -82,8 +83,8 @@ module Coopy
           end
         end
       end
-      src = Array.new()
-      dest = Array.new()
+      src = Array.new
+      dest = Array.new
       v = nil
       begin
         _g = 0
@@ -91,7 +92,7 @@ module Coopy
           i = _g
           _g+=1
           v = isrc[i]
-          src.push(v) if(in_dest.include?(v))
+          src.push(v) if in_dest.include?(v)
         end
       end
       begin
@@ -100,15 +101,15 @@ module Coopy
           i = _g
           _g+=1
           v = idest[i]
-          dest.push(v) if(in_src.include?(v))
+          dest.push(v) if in_src.include?(v)
         end
       end
       return ::Coopy::Mover.move_without_extras(src,dest)
     end
     
     def Mover.move_without_extras(src,dest)
-      return nil if(src.length != dest.length)
-      return [] if(src.length <= 1)
+      return nil if src.length != dest.length
+      return [] if src.length <= 1
       len = src.length
       in_src = {}
       blk_len = {}
@@ -134,12 +135,11 @@ module Coopy
       while(out_cursor < len) 
         v = dest[out_cursor]
         _next = in_src[v]
-        if(_next != in_cursor + 1) 
+        if _next != in_cursor + 1 
           blk = v
           ct = 1
           blk_src_loc[blk] = _next
           blk_dest_loc[blk] = out_cursor
-        
         else 
           ct+=1
         end
@@ -147,17 +147,18 @@ module Coopy
         in_cursor = _next
         out_cursor+=1
       end
-      blks = Array.new()
-      _it = ::Rb::RubyIterator.new(blk_len.keys(),nil)
-      while( _it.has_next() ) do k = _it._next()
-      blks.push(k)
+      blks = Array.new
+      _it = ::Rb::RubyIterator.new(blk_len.keys)
+      while(_it.has_next) do
+        k = _it._next
+        blks.push(k)
       end
       blks.sort {|a,b|
         return blk_len[b] - blk_len[a]
       }
-      moved = Array.new()
+      moved = Array.new
       while(blks.length > 0) 
-        blk1 = blks.shift()
+        blk1 = blks.shift
         blen = blks.length
         ref_src_loc = blk_src_loc[blk1]
         ref_dest_loc = blk_dest_loc[blk1]
@@ -167,7 +168,7 @@ module Coopy
           blki_src_loc = blk_src_loc[blki]
           to_left_src = blki_src_loc < ref_src_loc
           to_left_dest = blk_dest_loc[blki] < ref_dest_loc
-          if(to_left_src != to_left_dest) 
+          if to_left_src != to_left_dest 
             ct1 = blk_len[blki]
             begin
               _g = 0
@@ -178,7 +179,7 @@ module Coopy
                 blki_src_loc+=1
               end
             end
-            blks.splice(i,1)
+            blks.slice!(i,1)
           end
           i-=1
         end

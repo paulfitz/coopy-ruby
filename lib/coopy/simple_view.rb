@@ -1,11 +1,12 @@
 module Coopy
   class SimpleView 
-    def initialize()
+    
+    def initialize
     end
     
     def to_s(d)
-      return nil if(d == nil)
-      return "" + Std.string(d)
+      return nil if d == nil
+      return "" + d.to_s
     end
     
     def get_bag(d)
@@ -21,14 +22,14 @@ module Coopy
     end
     
     def equals(d1,d2)
-      return true if(d1 == nil && d2 == nil)
-      return true if(d1 == nil && "" + Std.string(d2) == "")
-      return true if("" + Std.string(d1) == "" && d2 == nil)
-      return "" + Std.string(d1) == "" + Std.string(d2)
+      return true if d1 == nil && d2 == nil
+      return true if d1 == nil && "" + d2.to_s == ""
+      return true if "" + d1.to_s == "" && d2 == nil
+      return "" + d1.to_s == "" + d2.to_s
     end
     
     def to_datum(str)
-      return nil if(str == nil)
+      return nil if str == nil
       return ::Coopy::SimpleCell.new(str)
     end
     

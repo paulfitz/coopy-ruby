@@ -1,41 +1,29 @@
 module Coopy
   class Viterbi 
-    def initialize()
+    
+    def initialize
       @K = @T = 0
-      self.reset()
-      @cost = ::Coopy::SparseSheet.new()
-      @src = ::Coopy::SparseSheet.new()
-      @path = ::Coopy::SparseSheet.new()
+      self.reset
+      @cost = ::Coopy::SparseSheet.new
+      @src = ::Coopy::SparseSheet.new
+      @path = ::Coopy::SparseSheet.new
     end
     
+    protected
+    
     attr_accessor :k
-    protected :k
-    
     attr_accessor :t
-    protected :t
-    
     attr_accessor :index
-    protected :index
-    
     attr_accessor :mode
-    protected :mode
-    
     attr_accessor :path_valid
-    protected :path_valid
-    
     attr_accessor :best_cost
-    protected :best_cost
-    
     attr_accessor :cost
-    protected :cost
-    
     attr_accessor :src
-    protected :src
-    
     attr_accessor :path
-    protected :path
     
-    def reset()
+    public
+    
+    def reset 
       @index = 0
       @mode = 0
       @path_valid = false
@@ -51,65 +39,64 @@ module Coopy
     end
     
     def assert_mode(_next)
-      @index+=1 if(_next == 0 && @mode == 1)
+      @index+=1 if _next == 0 && @mode == 1
       @mode = _next
     end
     
     def add_transition(s0,s1,c)
       resize = false
-      if(s0 >= @K) 
+      if s0 >= @K 
         @K = s0 + 1
         resize = true
       end
-      if(s1 >= @K) 
+      if s1 >= @K 
         @K = s1 + 1
         resize = true
       end
-      if(resize) 
+      if resize 
         @cost.non_destructive_resize(@K,@T,0)
         @src.non_destructive_resize(@K,@T,-1)
         @path.non_destructive_resize(1,@T,-1)
       end
       @path_valid = false
       self.assert_mode(1)
-      if(@index >= @T) 
+      if @index >= @T 
         @T = @index + 1
         @cost.non_destructive_resize(@K,@T,0)
         @src.non_destructive_resize(@K,@T,-1)
         @path.non_destructive_resize(1,@T,-1)
       end
       sourced = false
-      if(@index > 0) 
+      if @index > 0 
         c += @cost.get(s0,@index - 1)
         sourced = @src.get(s0,@index - 1) != -1
-      
       else 
         sourced = true
       end
-      if(sourced) 
-        if(c < @cost.get(s1,@index) || @src.get(s1,@index) == -1) 
+      if sourced 
+        if c < @cost.get(s1,@index) || @src.get(s1,@index) == -1 
           @cost.set(s1,@index,c)
           @src.set(s1,@index,s0)
         end
       end
     end
     
-    def end_transitions()
+    def end_transitions 
       @path_valid = false
       self.assert_mode(0)
     end
     
-    def begin_transitions()
+    def begin_transitions 
       @path_valid = false
       self.assert_mode(1)
     end
     
-    def calculate_path()
-      return if(@path_valid)
-      self.end_transitions()
+    def calculate_path 
+      return if @path_valid
+      self.end_transitions
       best = 0
       bestj = -1
-      if(@index <= 0) 
+      if @index <= 0 
         @path_valid = true
         return
       end
@@ -119,7 +106,7 @@ module Coopy
         while(_g1 < _g) 
           j = _g1
           _g1+=1
-          if((@cost.get(j,@index - 1) < best || bestj == -1) && @src.get(j,@index - 1) != -1) 
+          if (@cost.get(j,@index - 1) < best || bestj == -1) && @src.get(j,@index - 1) != -1 
             best = @cost.get(j,@index - 1)
             bestj = j
           end
@@ -134,15 +121,15 @@ module Coopy
           _g1+=1
           i = @index - 1 - j
           @path.set(0,i,bestj)
-          ::Haxe::Log._trace("Problem in Viterbi",{ file_name: "Viterbi.hx", line_number: 117, class_name: "coopy.Viterbi", method_name: "calculatePath"}) if(!(bestj != -1 && (bestj >= 0 && bestj < @K)))
+          ::Haxe::Log._trace("Problem in Viterbi",{ file_name: "Viterbi.hx", line_number: 117, class_name: "coopy.Viterbi", method_name: "calculatePath"}) if !(bestj != -1 && (bestj >= 0 && bestj < @K))
           bestj = @src.get(bestj,i)
         end
       end
       @path_valid = true
     end
     
-    def to_s()
-      self.calculate_path()
+    def to_s 
+      self.calculate_path
       txt = ""
       begin
         _g1 = 0
@@ -150,31 +137,30 @@ module Coopy
         while(_g1 < _g) 
           i = _g1
           _g1+=1
-          if(@path.get(0,i) == -1) 
+          if @path.get(0,i) == -1 
             txt += "*"
-          
           else 
             txt += @path.get(0,i)
           end
-          txt += " " if(@K >= 10)
+          txt += " " if @K >= 10
         end
       end
-      txt += " costs " + self.get_cost().to_s
+      txt += " costs " + self.get_cost.to_s
       return txt
     end
     
-    def length()
-      self.calculate_path() if(@index > 0)
+    def length 
+      self.calculate_path if @index > 0
       return @index
     end
     
     def get(i)
-      self.calculate_path()
+      self.calculate_path
       return @path.get(0,i)
     end
     
-    def get_cost()
-      self.calculate_path()
+    def get_cost 
+      self.calculate_path
       return @best_cost
     end
     

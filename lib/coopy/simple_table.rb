@@ -1,42 +1,40 @@
 module Coopy
   class SimpleTable 
+    
     def initialize(w,h)
       @data = {}
       @w = w
       @h = h
     end
     
+    # protected - in ruby this doesn't play well with static/inline methods
+    
     attr_accessor :data
-    protected :data
-    
     attr_accessor :w
-    protected :w
-    
     attr_accessor :h
-    protected :h
     
-    def get_table()
+    public
+    
+    def get_table 
       return self
     end
     
     def height() get_height end
     def height=(__v) @height = __v end
-    
     def width() get_width end
     def width=(__v) @width = __v end
-    
     def size() get_size end
     def size=(__v) @size = __v end
     
-    def get_width()
+    def get_width 
       return @w
     end
     
-    def get_height()
+    def get_height 
       return @h
     end
     
-    def get_size()
+    def get_size 
       return @h
     end
     
@@ -52,15 +50,15 @@ module Coopy
       end
     end
     
-    def to_s()
+    def to_s 
       return ::Coopy::SimpleTable.table_to_string(self)
     end
     
-    def get_cell_view()
-      return ::Coopy::SimpleView.new()
+    def get_cell_view 
+      return ::Coopy::SimpleView.new
     end
     
-    def is_resizable()
+    def is_resizable 
       return true
     end
     
@@ -70,7 +68,7 @@ module Coopy
       return true
     end
     
-    def clear()
+    def clear 
       @data = {}
     end
     
@@ -83,14 +81,14 @@ module Coopy
           i = _g1
           _g1+=1
           j = fate[i]
-          if(j != -1) 
+          if j != -1 
             _g3 = 0
             _g2 = @w
             while(_g3 < _g2) 
               c = _g3
               _g3+=1
               idx = i * @w + c
-              if(@data.include?(idx)) 
+              if @data.include?(idx) 
                 value = @data[idx]
                 begin
                   value1 = value
@@ -115,14 +113,14 @@ module Coopy
           i = _g1
           _g1+=1
           j = fate[i]
-          if(j != -1) 
+          if j != -1 
             _g3 = 0
             _g2 = @h
             while(_g3 < _g2) 
               r = _g3
               _g3+=1
               idx = r * @w + i
-              if(@data.include?(idx)) 
+              if @data.include?(idx) 
                 value = @data[idx]
                 begin
                   value1 = value
@@ -138,48 +136,48 @@ module Coopy
       return true
     end
     
-    def trim_blank()
-      return true if(@h == 0)
+    def trim_blank 
+      return true if @h == 0
       h_test = @h
-      h_test = 3 if(h_test >= 3)
-      view = self.get_cell_view()
+      h_test = 3 if h_test >= 3
+      view = self.get_cell_view
       space = view.to_datum("")
       more = true
       while(more) 
         begin
           _g1 = 0
-          _g = self.get_width()
+          _g = self.get_width
           while(_g1 < _g) 
             i = _g1
             _g1+=1
             c = self.get_cell(i,@h - 1)
-            if(!(view.equals(c,space) || c == nil)) 
+            if !(view.equals(c,space) || c == nil) 
               more = false
               break
             end
           end
         end
-        @h-=1 if(more)
+        @h-=1 if more
       end
       more = true
       nw = @w
       while(more) 
-        break if(@w == 0)
+        break if @w == 0
         begin
           _g = 0
           while(_g < h_test) 
             i = _g
             _g+=1
             c = self.get_cell(nw - 1,i)
-            if(!(view.equals(c,space) || c == nil)) 
+            if !(view.equals(c,space) || c == nil) 
               more = false
               break
             end
           end
         end
-        nw-=1 if(more)
+        nw-=1 if more
       end
-      return true if(nw == @w)
+      return true if nw == @w
       data2 = {}
       begin
         _g = 0
@@ -193,7 +191,7 @@ module Coopy
               r = _g2
               _g2+=1
               idx = r * @w + i
-              if(@data.include?(idx)) 
+              if @data.include?(idx) 
                 value = @data[idx]
                 begin
                   value1 = value
@@ -213,18 +211,19 @@ module Coopy
       x = ""
       begin
         _g1 = 0
-        _g = tab.get_height()
+        _g = tab.get_height
         while(_g1 < _g) 
           i = _g1
           _g1+=1
           begin
             _g3 = 0
-            _g2 = tab.get_width()
+            _g2 = tab.get_width
             while(_g3 < _g2) 
               j = _g3
               _g3+=1
-              x += " " if(j > 0)
-              x += Std.string(tab.get_cell(j,i))
+              x += " " if j > 0
+              x += lambda{ s = tab.get_cell(j,i)
+              _r = s.to_s}.call()
             end
           end
           x += "\n"

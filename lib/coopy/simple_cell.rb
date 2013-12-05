@@ -1,13 +1,17 @@
 module Coopy
   class SimpleCell 
+    
     def initialize(x)
       @datum = x
     end
     
-    attr_accessor :datum
-    protected :datum
+    protected
     
-    def to_s()
+    attr_accessor :datum
+    
+    public
+    
+    def to_s 
       return @datum
     end
     

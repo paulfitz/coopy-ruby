@@ -1,33 +1,26 @@
 module Coopy
   class Index 
-    def initialize()
+    
+    def initialize
       @items = {}
-      @cols = Array.new()
-      @keys = Array.new()
+      @cols = Array.new
+      @keys = Array.new
       @top_freq = 0
       @height = 0
     end
     
     attr_accessor :items
-    
-    
     attr_accessor :keys
-    
-    
     attr_accessor :top_freq
-    
-    
     attr_accessor :height
     
+    protected
     
     attr_accessor :cols
-    protected :cols
-    
     attr_accessor :v
-    protected :v
-    
     attr_accessor :indexed_table
-    protected :indexed_table
+    
+    public
     
     def add_column(i)
       @cols.push(i)
@@ -37,33 +30,32 @@ module Coopy
       @indexed_table = t
       begin
         _g1 = 0
-        _g = t.get_height()
+        _g = t.get_height
         while(_g1 < _g) 
           i = _g1
           _g1+=1
           key = nil
-          if(@keys.length > i) 
+          if @keys.length > i 
             key = @keys[i]
-          
           else 
             key = self.to_key(t,i)
             @keys.push(key)
           end
           item = @items[key]
-          if(item == nil) 
-            item = ::Coopy::IndexItem.new()
+          if item == nil 
+            item = ::Coopy::IndexItem.new
             @items[key] = item
           end
           ct = item.add(i)
-          @top_freq = ct if(ct > @top_freq)
+          @top_freq = ct if ct > @top_freq
         end
       end
-      @height = t.get_height()
+      @height = t.get_height
     end
     
     def to_key(t,i)
       wide = ""
-      @v = t.get_cell_view() if(@v == nil)
+      @v = t.get_cell_view if @v == nil
       begin
         _g1 = 0
         _g = @cols.length
@@ -72,8 +64,8 @@ module Coopy
           _g1+=1
           d = t.get_cell(@cols[k],i)
           txt = @v.to_s(d)
-          next if(txt == "" || txt == "null" || txt == "undefined")
-          wide += " // " if(k > 0)
+          next if txt == "" || txt == "null" || txt == "undefined"
+          wide += " // " if k > 0
           wide += txt
         end
       end
@@ -89,15 +81,15 @@ module Coopy
           k = _g1
           _g1+=1
           txt = row.get_row_string(@cols[k])
-          next if(txt == "" || txt == "null" || txt == "undefined")
-          wide += " // " if(k > 0)
+          next if txt == "" || txt == "null" || txt == "undefined"
+          wide += " // " if k > 0
           wide += txt
         end
       end
       return wide
     end
     
-    def get_table()
+    def get_table 
       return @indexed_table
     end
     

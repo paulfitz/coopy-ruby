@@ -1,7 +1,5 @@
 module Coopy
   class Table 
-    
-    
     def getCell(x,y) puts "Abstract Table.getCell called" end
     def setCell(x,y,c) puts "Abstract Table.setCell called" end
     def getCellView() puts "Abstract Table.getCellView called" end

@@ -1,20 +1,18 @@
 module Coopy
   class SparseSheet 
-    def initialize()
+    
+    def initialize
       @h = @w = 0
     end
     
+    protected
+    
     attr_accessor :h
-    protected :h
-    
     attr_accessor :w
-    protected :w
-    
     attr_accessor :row
-    protected :row
-    
     attr_accessor :zero
-    protected :zero
+    
+    public
     
     def resize(w,h,zero)
       @row = {}
@@ -29,15 +27,15 @@ module Coopy
     
     def get(x,y)
       cursor = @row[y]
-      return @zero if(cursor == nil)
+      return @zero if cursor == nil
       val = cursor[x]
-      return @zero if(val == nil)
+      return @zero if val == nil
       return val
     end
     
     def set(x,y,val)
       cursor = @row[y]
-      if(cursor == nil) 
+      if cursor == nil 
         cursor = {}
         @row[y] = cursor
       end

@@ -1,26 +1,28 @@
 module Coopy
   class Ordering 
-    def initialize()
-      @order = Array.new()
+    
+    def initialize
+      @order = Array.new
       @ignore_parent = false
     end
     
-    attr_accessor :order
-    protected :order
+    protected
     
+    attr_accessor :order
     attr_accessor :ignore_parent
-    protected :ignore_parent
+    
+    public
     
     def add(l,r,p = -2)
-      p = -2 if(@ignore_parent)
+      p = -2 if @ignore_parent
       @order.push(::Coopy::Unit.new(l,r,p))
     end
     
-    def get_list()
+    def get_list 
       return @order
     end
     
-    def to_s()
+    def to_s 
       txt = ""
       begin
         _g1 = 0
@@ -28,14 +30,14 @@ module Coopy
         while(_g1 < _g) 
           i = _g1
           _g1+=1
-          txt += ", " if(i > 0)
-          txt += Std.string(@order[i])
+          txt += ", " if i > 0
+          txt += @order[i].to_s
         end
       end
       return txt
     end
     
-    def ignore_parent()
+    def ignore_parent 
       @ignore_parent = true
     end
     

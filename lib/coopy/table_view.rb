@@ -1,10 +1,11 @@
 module Coopy
   class TableView 
-    def initialize()
+    
+    def initialize
     end
     
     def to_s(d)
-      return "" + Std.string(d)
+      return "" + d.to_s
     end
     
     def get_bag(d)

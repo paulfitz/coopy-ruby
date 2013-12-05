@@ -1,33 +1,40 @@
 module Rb
   class RubyIterator 
-    def initialize(x,base)
-      @ref = x
-      @at = 0
-      @base = base
+    
+    def initialize(x)
+      if x.respond_to?("each") 
+        @ref = x.each
+        @at = 0
+        @len = x.size
+      elsif x.respond_to?("iterator") 
+        @ref = x.iterator
+        @at = -1
+        @at = -2 if !@ref.respond_to?("has_next")
+      else 
+        @ref = x
+        @at = -2
+      end
     end
     
-    attr_accessor :base
-    protected :base
+    protected
     
     attr_accessor :ref
-    protected :ref
-    
     attr_accessor :at
-    protected :at
+    attr_accessor :len
     
-    def has_next()
-      return @at < @ref.length
+    public
+    
+    def has_next 
+      return @ref.has_next if @at == -1
+      return @ref[:has_next].call if @at == -2
+      return @at < @len
     end
     
-    def _next()
-      if(@base == nil) 
-        v = @ref[@at]
-        @at+=1
-        return v
-      end
-      v = @base[@ref[@at]]
+    def _next 
+      return @ref._next if @at == -1
+      return @ref[:_next].call if @at == -2
       @at+=1
-      return v
+      return @ref.next
     end
     
   end
