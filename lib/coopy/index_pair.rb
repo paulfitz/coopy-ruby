@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 module Coopy
   class IndexPair 
     
@@ -40,7 +43,7 @@ module Coopy
         good+=1 if spot_a == 1 && spot_b == 1
       end
       @quality = good / lambda{|_this_| b1 = a.get_height
-      _r2 = ([1.0,b1]).max}.call(self)
+      _r2 = [1.0,b1].max}.call(self)
     end
     
     protected

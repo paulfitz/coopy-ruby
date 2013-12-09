@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 module Sys::Io
   class FileOutput < ::Haxe::Io::Output 
     

@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 module Coopy
   class Alignment 
     
@@ -171,7 +174,7 @@ module Coopy
       while(ct_vp > 0 || ct_vl > 0 || ct_vr > 0) 
         ct+=1
         if ct > max_ct 
-          ::Haxe::Log._trace("Ordering took too long, something went wrong",{ file_name: "Alignment.hx", line_number: 151, class_name: "coopy.Alignment", method_name: "toOrder3"})
+          ::Haxe::Log._trace.call("Ordering took too long, something went wrong",{ file_name: "Alignment.hx", line_number: 151, class_name: "coopy.Alignment", method_name: "toOrder3"})
           break
         end
         xp = 0 if xp >= hp

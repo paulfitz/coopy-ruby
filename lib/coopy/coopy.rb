@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 module Coopy
   class Coopy 
     
@@ -93,9 +96,9 @@ module Coopy
     def Coopy.random_tests 
       st = ::Coopy::SimpleTable.new(15,6)
       tab = st
-      ::Haxe::Log._trace("table size is " + tab.get_width.to_s + "x" + tab.get_height.to_s,{ file_name: "Coopy.hx", line_number: 40, class_name: "coopy.Coopy", method_name: "randomTests"})
+      ::Haxe::Log._trace.call("table size is " + tab.get_width.to_s + "x" + tab.get_height.to_s,{ file_name: "Coopy.hx", line_number: 40, class_name: "coopy.Coopy", method_name: "randomTests"})
       tab.set_cell(3,4,::Coopy::SimpleCell.new(33))
-      ::Haxe::Log._trace("element is " + lambda{ s = tab.get_cell(3,4)
+      ::Haxe::Log._trace.call("element is " + lambda{ s = tab.get_cell(3,4)
       _r = s.to_s}.call(),{ file_name: "Coopy.hx", line_number: 42, class_name: "coopy.Coopy", method_name: "randomTests"})
       compare = ::Coopy::Compare.new
       d1 = ::Coopy::ViewedDatum.get_simple_view(::Coopy::SimpleCell.new(10))
@@ -103,26 +106,26 @@ module Coopy
       d3 = ::Coopy::ViewedDatum.get_simple_view(::Coopy::SimpleCell.new(20))
       report = ::Coopy::Report.new
       compare.compare(d1,d2,d3,report)
-      ::Haxe::Log._trace("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 50, class_name: "coopy.Coopy", method_name: "randomTests"})
+      ::Haxe::Log._trace.call("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 50, class_name: "coopy.Coopy", method_name: "randomTests"})
       d2 = ::Coopy::ViewedDatum.get_simple_view(::Coopy::SimpleCell.new(50))
       report.clear
       compare.compare(d1,d2,d3,report)
-      ::Haxe::Log._trace("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 54, class_name: "coopy.Coopy", method_name: "randomTests"})
+      ::Haxe::Log._trace.call("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 54, class_name: "coopy.Coopy", method_name: "randomTests"})
       d2 = ::Coopy::ViewedDatum.get_simple_view(::Coopy::SimpleCell.new(20))
       report.clear
       compare.compare(d1,d2,d3,report)
-      ::Haxe::Log._trace("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 58, class_name: "coopy.Coopy", method_name: "randomTests"})
+      ::Haxe::Log._trace.call("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 58, class_name: "coopy.Coopy", method_name: "randomTests"})
       d1 = ::Coopy::ViewedDatum.get_simple_view(::Coopy::SimpleCell.new(20))
       report.clear
       compare.compare(d1,d2,d3,report)
-      ::Haxe::Log._trace("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 62, class_name: "coopy.Coopy", method_name: "randomTests"})
+      ::Haxe::Log._trace.call("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 62, class_name: "coopy.Coopy", method_name: "randomTests"})
       tv = ::Coopy::TableView.new
       comp = ::Coopy::TableComparisonState.new
       ct = ::Coopy::CompareTable.new
       comp.a = st
       comp.b = st
       ct.attach(comp)
-      ::Haxe::Log._trace("comparing tables",{ file_name: "Coopy.hx", line_number: 72, class_name: "coopy.Coopy", method_name: "randomTests"})
+      ::Haxe::Log._trace.call("comparing tables",{ file_name: "Coopy.hx", line_number: 72, class_name: "coopy.Coopy", method_name: "randomTests"})
       t1 = ::Coopy::SimpleTable.new(3,2)
       t2 = ::Coopy::SimpleTable.new(3,2)
       t3 = ::Coopy::SimpleTable.new(3,2)
@@ -130,13 +133,13 @@ module Coopy
       dt2 = ::Coopy::ViewedDatum.new(t2,::Coopy::TableView.new)
       dt3 = ::Coopy::ViewedDatum.new(t3,::Coopy::TableView.new)
       compare.compare(dt1,dt2,dt3,report)
-      ::Haxe::Log._trace("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 80, class_name: "coopy.Coopy", method_name: "randomTests"})
+      ::Haxe::Log._trace.call("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 80, class_name: "coopy.Coopy", method_name: "randomTests"})
       t3.set_cell(1,1,::Coopy::SimpleCell.new("hello"))
       compare.compare(dt1,dt2,dt3,report)
-      ::Haxe::Log._trace("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 83, class_name: "coopy.Coopy", method_name: "randomTests"})
+      ::Haxe::Log._trace.call("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 83, class_name: "coopy.Coopy", method_name: "randomTests"})
       t1.set_cell(1,1,::Coopy::SimpleCell.new("hello"))
       compare.compare(dt1,dt2,dt3,report)
-      ::Haxe::Log._trace("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 86, class_name: "coopy.Coopy", method_name: "randomTests"})
+      ::Haxe::Log._trace.call("report is " + report.to_s,{ file_name: "Coopy.hx", line_number: 86, class_name: "coopy.Coopy", method_name: "randomTests"})
       v = ::Coopy::Viterbi.new
       td = ::Coopy::TableDiff.new(nil,nil)
       idx = ::Coopy::Index.new
@@ -363,7 +366,7 @@ module Coopy
           txt += "\n"
         end
       end
-      ::Haxe::Log._trace(txt,{ file_name: "Coopy.hx", line_number: 345, class_name: "coopy.Coopy", method_name: "show"})
+      ::Haxe::Log._trace.call(txt,{ file_name: "Coopy.hx", line_number: 345, class_name: "coopy.Coopy", method_name: "show"})
     end
     
     def Coopy.jsonify(t)

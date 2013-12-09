@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 module Coopy
   class Viterbi 
     
@@ -121,7 +124,7 @@ module Coopy
           _g1+=1
           i = @index - 1 - j
           @path.set(0,i,bestj)
-          ::Haxe::Log._trace("Problem in Viterbi",{ file_name: "Viterbi.hx", line_number: 117, class_name: "coopy.Viterbi", method_name: "calculatePath"}) if !(bestj != -1 && (bestj >= 0 && bestj < @K))
+          ::Haxe::Log._trace.call("Problem in Viterbi",{ file_name: "Viterbi.hx", line_number: 117, class_name: "coopy.Viterbi", method_name: "calculatePath"}) if !(bestj != -1 && (bestj >= 0 && bestj < @K))
           bestj = @src.get(bestj,i)
         end
       end

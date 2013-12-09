@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 module Coopy
   class View 
     def toString(d) puts "Abstract View.toString called" end

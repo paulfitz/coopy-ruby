@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 begin 
   import flash.Boot
   public class enum {

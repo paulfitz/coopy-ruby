@@ -1,3 +1,6 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 module Coopy
   class TableView 
     
@@ -22,7 +25,7 @@ module Coopy
     end
     
     def equals(d1,d2)
-      ::Haxe::Log._trace("TableView.equals called",{ file_name: "TableView.hx", line_number: 28, class_name: "coopy.TableView", method_name: "equals"})
+      ::Haxe::Log._trace.call("TableView.equals called",{ file_name: "TableView.hx", line_number: 28, class_name: "coopy.TableView", method_name: "equals"})
       return false
     end
     
